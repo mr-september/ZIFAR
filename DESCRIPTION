@@ -1,6 +1,6 @@
 Package: ZIFAR
 Title: Zero-Inflated Factor Analysis for Single-Cell Data
-Version: 0.1.0
+Version: 0.3.0
 Authors@R: c(
     person("Larry Cai", "", email = "larry.cai@uq.edu.au", role = c("aut", "cre")),
     person("Emma Pierson", "", role = c("aut", "cph")),
