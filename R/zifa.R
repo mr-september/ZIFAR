@@ -207,40 +207,46 @@ update_parameters <- function(Y, Z_mean, Z_cov, decay_coef) {
   )
 }
 
-#' Compute log-likelihood for current parameter estimates
+#' Compute log-likelihood for current parameter estimates (vectorised)
 #'
-#' @param Y Data matrix
-#' @param Z Mean of latent variables
-#' @param lambda Loading matrix
-#' @param sigma Vector of variances
+#' @param Y Data matrix (genes x samples)
+#' @param Z Matrix of latent variables (samples x k)
+#' @param lambda Loading matrix (k x genes)
+#' @param sigma Vector of variances (length equal to number of genes)
 #' @param decay_coef Zero-inflation decay coefficient
 #'
 #' @return Log-likelihood value
 #' @keywords internal
 compute_log_likelihood <- function(Y, Z, lambda, sigma, decay_coef) {
-  n_genes <- nrow(Y)
-  n_samples <- ncol(Y)
-  ll <- 0
+  # Transpose Y so that rows correspond to samples and columns to genes
+  Y_t <- t(Y)  # Now: samples x genes
+  n_samples <- nrow(Y_t)
+  n_genes <- ncol(Y_t)
   
-  for (i in 1:n_samples) {
-    for (j in 1:n_genes) {
-      mu <- sum(Z[i,] * lambda[,j])
-      if (Y[j,i] == 0) {
-        # Zero component
-        p_zero <- compute_zero_probability(mu, decay_coef)
-        p_nz_zero <- dnorm(0, mean = mu, sd = sqrt(sigma[j]))
-        ll <- ll + log(p_zero + (1 - p_zero) * p_nz_zero)
-      } else {
-        # Non-zero component
-        p_zero <- compute_zero_probability(mu, decay_coef)
-        ll <- ll + log(1 - p_zero) + 
-          dnorm(Y[j,i], mean = mu, sd = sqrt(sigma[j]), log = TRUE)
-      }
-    }
-  }
+  # Compute the mean matrix: each element mu[i,j] = sum_r Z[i, r] * lambda[r, j]
+  M <- Z %*% lambda  # n_samples x n_genes
   
-  return(ll)
+  # Create a matrix of standard deviations from sigma (replicate across samples)
+  sigma_mat <- matrix(sqrt(sigma), nrow = n_samples, ncol = n_genes, byrow = TRUE)
+  
+  # Compute the zero-inflation probability matrix
+  p_zero <- exp(-decay_coef * (M^2))
+  
+  # For zero entries: probability is p_zero + (1 - p_zero)*dnorm(0, M, sigma)
+  p_nz_zero <- dnorm(0, mean = M, sd = sigma_mat)
+  ll_zero <- log(p_zero + (1 - p_zero) * p_nz_zero)
+  
+  # For non-zero entries: probability is (1 - p_zero)*dnorm(Y, M, sigma)
+  ll_nonzero <- log(1 - p_zero) + dnorm(Y_t, mean = M, sd = sigma_mat, log = TRUE)
+  
+  # Use vectorised selection based on whether Y_t is zero or not
+  ll_mat <- ifelse(Y_t == 0, ll_zero, ll_nonzero)
+  
+  # Sum all contributions to obtain total log-likelihood
+  ll_total <- sum(ll_mat)
+  return(ll_total)
 }
+
 
 #' Compute zero probability
 #'
