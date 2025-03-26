@@ -2,7 +2,7 @@ Package: ZIFAR
 Title: Zero-Inflated Factor Analysis for Single-Cell Data
 Version: 0.1.0
 Authors@R: c(
-    person("Your Name", "", email = "your.email@example.com", role = c("aut", "cre")),
+    person("Larry Cai", "", email = "larry.cai@uq.edu.au", role = c("aut", "cre")),
     person("Emma Pierson", "", role = c("aut", "cph")),
     person("Christopher Yau", "", role = c("aut", "cph"))
   )
@@ -14,7 +14,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Imports: 
     stats,
     Matrix,
