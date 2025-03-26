@@ -283,3 +283,25 @@ decay_log_likelihood <- function(Y, Z, lambda, sigma, decay_coef) {
   
   return(ll)
 }
+
+#' Fit ZIFA Model for SummarizedExperiment Objects
+#'
+#' This method extracts the primary assay data from a SummarizedExperiment
+#' object and fits the ZIFA model.
+#'
+#' @param se A SummarizedExperiment object.
+#' @param k Integer specifying the number of latent dimensions.
+#' @param ... Additional parameters passed to fit_zifa.
+#'
+#' @return The result from fit_zifa.
+#' @export
+fit_zifa.SummarizedExperiment <- function(se, k, ...) {
+  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+    stop("The 'SummarizedExperiment' package is required but not installed.")
+  }
+  # Extract the primary assay data
+  Y <- SummarizedExperiment::assay(se)
+  # Fit the ZIFA model on the extracted data
+  result <- fit_zifa(Y, k, ...)
+  return(result)
+}
