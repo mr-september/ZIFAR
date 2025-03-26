@@ -72,3 +72,26 @@ fit_block_zifa <- function(Y, k, n_blocks = NULL, ...) {
   
   return(final_result)
 }
+
+#' Fit Block ZIFA Model for SummarizedExperiment Objects
+#'
+#' This method extracts the primary assay data from a SummarizedExperiment
+#' object and fits the block-wise ZIFA model.
+#'
+#' @param se A SummarizedExperiment object.
+#' @param k Integer specifying the number of latent dimensions.
+#' @param ... Additional parameters passed to fit_block_zifa.
+#'
+#' @return The result from fit_block_zifa.
+#' @export
+fit_block_zifa.SummarizedExperiment <- function(se, k, ...) {
+  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+    stop("The 'SummarizedExperiment' package is required but not installed.")
+  }
+  # Extract the primary assay data
+  Y <- SummarizedExperiment::assay(se)
+  # Fit the block-wise ZIFA model on the extracted data
+  result <- fit_block_zifa(Y, k, ...)
+  return(result)
+}
+
