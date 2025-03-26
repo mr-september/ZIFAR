@@ -19,53 +19,50 @@ if (!requireNamespace("devtools", quietly = TRUE))
   install.packages("devtools")
   
 devtools::install_github("mr-september/ZIFAR")
-install.packages("devtools")
-devtools::install_github("mr-september/ZIFAR")
 ```
-
-## Overview
-
-Single-cell RNA sequencing data often contains many zero counts due to both biological zeros and technical dropouts. ZIFA models the dropout probability as a function of the expected expression level, providing more accurate dimensionality reduction than methods that don't account for this zero-inflation.
-
-This package provides:
-- A complete R implementation of the ZIFA algorithm
-- Support for sparse matrices to efficiently handle large datasets
-- Native compatibility with Bioconductor's SummarizedExperiment objects
-- Visualization functions for exploring the reduced dimensions
 
 ## Usage
+Fitting the ZIFA Model
+``` r
+# Simulate some data
+set.seed(123)
+true_Z <- matrix(rnorm(100), ncol = 2)
+lambda <- matrix(runif(1000, -1, 1), nrow = 500)
+mu <- true_Z %*% t(lambda)
+Y <- mu + matrix(rnorm(500*50), nrow = 500)
+# Introduce zero-inflation
+mask <- matrix(rbinom(500*50, 1, prob = 0.3), nrow = 500)
+Y[mask == 1] <- 0
 
-Basic usage with a count matrix:
-
-```r
-library(ZIFAR)
-
-With a regular count matrix
-results <- zifa(counts_matrix, k = 10)
-
-Visualize the results
-plot_zifa(results)
-
-With a SummarizedExperiment object
-library(SummarizedExperiment)
-se_results <- zifa(summarized_experiment, k = 10)
-
+# Fit the ZIFA model
+result <- fit_zifa(Y, k = 2)
 ```
 
-## Parameters
+Block-wise ZIFA
+```r
+# Fit the block-wise ZIFA model
+result_block <- fit_block_zifa(Y, k = 2)
+```
 
-- `data`: Count matrix (genes × cells) or SummarizedExperiment object
-- `k`: Number of latent dimensions
-- `n_iterations`: Maximum number of iterations for optimization
-- `convergence_threshold`: Convergence criterion
-- `dropout_model`: Model to use for dropout events (default: "exponential")
+Using SummarizedExperiment Objects
+```r
+if (requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+  library(SummarizedExperiment)
+  # Create a SummarizedExperiment object
+  se <- SummarizedExperiment(assays = list(counts = Y))
+  # Fit the ZIFA model directly on the SummarizedExperiment
+  result_se <- fit_zifa(se, k = 2)
+}
+```
 
-## References
-
-This package implements the method described in:
-
-Pierson, E., & Yau, C. (2015). ZIFA: Dimensionality reduction for zero-inflated single-cell gene expression analysis. Genome biology, 16(1), 1-10.
+## Dependencies
+- R (>= 3.5)
+- ggplot2 (for plotting, used in plot_zifa)
+- SummarizedExperiment (optional, for enhanced compatibility)
 
 ## License
+This project is licensed under the MIT License.
 
-MIT
+## Acknowledgements
+This package is inspired by the original ZIFA algorithm and aims to provide a user-friendly implementation for the R community, as originally implemented in:
+Pierson, E., & Yau, C. (2015). ZIFA: Dimensionality reduction for zero-inflated single-cell gene expression analysis. Genome biology, 16(1), 1-10.
