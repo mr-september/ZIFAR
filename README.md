@@ -1,6 +1,8 @@
+# NOTE: This package is still under active development and troubleshooting. Do not expect it to work as-is. Feel free to contribute.
+
 # ZIFAR
 
-**ZIFAR** is a native R package implementing Zero-Inflated Factor Analysis (ZIFA) for dimensionality reduction, particularly tailored for zero-inflated data such as single-cell gene expression datasets.
+**ZIFAR** is a native R package implementing Zero-Inflated Factor Analysis (ZIFA) for dimensionality reduction, particularly tailored for zero-inflated data such as single-cell gene expression datasets, as originally published by Pierson, E., & Yau, C. (2015).
 
 ## Features
 
