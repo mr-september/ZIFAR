@@ -28,6 +28,11 @@
 #'
 #' @export
 fit_block_zifa <- function(Y, k, n_blocks = NULL, ...) {
+
+  if (inherits(Y, "SummarizedExperiment")) {
+    Y <- SummarizedExperiment::assay(Y)
+  }
+
   n_genes <- nrow(Y)
   n_samples <- ncol(Y)
   
@@ -42,7 +47,14 @@ fit_block_zifa <- function(Y, k, n_blocks = NULL, ...) {
   for (b in 1:n_blocks) {
     start_idx <- (b - 1) * block_size + 1
     end_idx <- min(b * block_size, n_genes)
-    blocks[[b]] <- start_idx:end_idx
+    block_indices <- start_idx:end_idx  # Define block_indices here
+    
+    if (length(block_indices) == 0) {
+      warning("Empty block encountered, skipping")
+      next
+    }
+    
+    blocks[[b]] <- block_indices
   }
   
   # Initialize results
@@ -85,13 +97,17 @@ fit_block_zifa <- function(Y, k, n_blocks = NULL, ...) {
 #' @return The result from fit_block_zifa.
 #' @export
 fit_block_zifa.SummarizedExperiment <- function(se, k, ...) {
-  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
-    stop("The 'SummarizedExperiment' package is required but not installed.")
+  # Convert SummarizedExperiment input to a matrix if needed
+  if (inherits(se, "SummarizedExperiment")) {
+    if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+      stop("SummarizedExperiment package required but not installed")
+    }
+    Y <- SummarizedExperiment::assay(se) 
+  } else if (!is.matrix(se)) {
+    stop("Input se must be a matrix or SummarizedExperiment object")
   }
-  # Extract the primary assay data
-  Y <- SummarizedExperiment::assay(se)
-  # Fit the block-wise ZIFA model on the extracted data
+  
+  # Fit the ZIFA model on the extracted data
   result <- fit_block_zifa(Y, k, ...)
   return(result)
 }
-

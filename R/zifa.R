@@ -32,17 +32,30 @@
 #'
 #' @export
 fit_zifa <- function(Y, k, iterations = 100, 
-                    convergence_criterion = 1e-5,
-                    lambda_init = NULL,
-                    sigma_init = NULL,
-                    decay_coef = 1.0) {
-  
+                     convergence_criterion = 1e-5,
+                     lambda_init = NULL,
+                     sigma_init = NULL,
+                     decay_coef = 1.0) {
+
+  if (inherits(Y, "SummarizedExperiment")) {
+    Y <- SummarizedExperiment::assay(Y)
+  }
+
+  if (all(Y == 0)) {
+    stop("Input matrix contains only zeros")
+  }
+
   n_genes <- nrow(Y)
   n_samples <- ncol(Y)
   
   # Initialize parameters using standard factor analysis if not provided
   if (is.null(lambda_init) || is.null(sigma_init)) {
-    fa_result <- stats::factanal(t(Y), factors = k, scores = "regression")
+    # Precondition the data by adding tiny noise to break linear dependencies
+    epsilon <- 1e-6
+    Y_adjusted <- Y + matrix(rnorm(nrow(Y) * ncol(Y), mean = 0, sd = epsilon),
+                             nrow = nrow(Y), ncol = ncol(Y))
+    
+    fa_result <- stats::factanal(t(Y_adjusted), factors = k, scores = "regression")
     lambda_init <- t(fa_result$loadings)
     sigma_init <- rep(1, n_genes)
   }
@@ -88,6 +101,7 @@ fit_zifa <- function(Y, k, iterations = 100,
     ll = ll_trace[1:iter]
   )
 }
+
 
 #' Compute posterior distribution of Z given Y
 #'
@@ -302,11 +316,16 @@ decay_log_likelihood <- function(Y, Z, lambda, sigma, decay_coef) {
 #' @return The result from fit_zifa.
 #' @export
 fit_zifa.SummarizedExperiment <- function(se, k, ...) {
-  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
-    stop("The 'SummarizedExperiment' package is required but not installed.")
+  # Convert SummarizedExperiment input to a matrix if needed
+  if (inherits(se, "SummarizedExperiment")) {
+    if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+      stop("SummarizedExperiment package required but not installed")
+    }
+    Y <- SummarizedExperiment::assay(se) 
+  } else if (!is.matrix(se)) {
+    stop("Input se must be a matrix or SummarizedExperiment object")
   }
-  # Extract the primary assay data
-  Y <- SummarizedExperiment::assay(se)
+  
   # Fit the ZIFA model on the extracted data
   result <- fit_zifa(Y, k, ...)
   return(result)

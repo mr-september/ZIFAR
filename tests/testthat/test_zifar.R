@@ -1,12 +1,10 @@
-context("Testing ZIFA and Block ZIFA functions")
-
 test_that("fit_zifa returns a list with expected elements", {
   set.seed(123)
   # Simulate data
   true_Z <- matrix(rnorm(100), ncol = 2)
   lambda <- matrix(runif(500 * 2, -1, 1), nrow = 500)
-  mu <- true_Z %*% t(lambda)
-  Y <- mu + matrix(rnorm(500 * 50), nrow = 500)
+  mu <- lambda %*% t(true_Z)
+  Y <- mu + matrix(rnorm(500 * 50, sd = 0.5), nrow = 500) + matrix(rnorm(500 * 50, mean = 0, sd = 1e-6), nrow = 500)
   # Introduce zero-inflation
   mask <- matrix(rbinom(500 * 50, 1, prob = 0.3), nrow = 500)
   Y[mask == 1] <- 0
@@ -22,17 +20,15 @@ test_that("fit_zifa returns a list with expected elements", {
 
 test_that("fit_zifa handles a matrix with all zeros", {
   Y <- matrix(0, nrow = 100, ncol = 20)
-  result <- fit_zifa(Y, k = 2)
-  expect_true(is.list(result))
-  expect_equal(dim(result$Z), c(20, 2))
+  expect_error(fit_zifa(Y, k = 2), "Input matrix contains only zeros")
 })
 
 test_that("fit_block_zifa returns results with expected dimensions", {
   set.seed(123)
   true_Z <- matrix(rnorm(100), ncol = 2)
   lambda <- matrix(runif(500 * 2, -1, 1), nrow = 500)
-  mu <- true_Z %*% t(lambda)
-  Y <- mu + matrix(rnorm(500 * 50), nrow = 500)
+  mu <- lambda %*% t(true_Z)
+  Y <- mu + matrix(rnorm(500 * 50, sd = 0.5), nrow = 500) + matrix(rnorm(500 * 50, mean = 0, sd = 1e-6), nrow = 500)
   mask <- matrix(rbinom(500 * 50, 1, prob = 0.3), nrow = 500)
   Y[mask == 1] <- 0
   
@@ -47,8 +43,8 @@ test_that("S3 method for SummarizedExperiment works for fit_zifa", {
     set.seed(123)
     true_Z <- matrix(rnorm(100), ncol = 2)
     lambda <- matrix(runif(500 * 2, -1, 1), nrow = 500)
-    mu <- true_Z %*% t(lambda)
-    Y <- mu + matrix(rnorm(500 * 50), nrow = 500)
+    mu <- lambda %*% t(true_Z)
+    Y <- mu + matrix(rnorm(500 * 50, sd = 0.5), nrow = 500) + matrix(rnorm(500 * 50, mean = 0, sd = 1e-6), nrow = 500)
     mask <- matrix(rbinom(500 * 50, 1, prob = 0.3), nrow = 500)
     Y[mask == 1] <- 0
     se <- SummarizedExperiment(assays = list(counts = Y))
@@ -67,8 +63,8 @@ test_that("S3 method for SummarizedExperiment works for fit_block_zifa", {
     set.seed(123)
     true_Z <- matrix(rnorm(100), ncol = 2)
     lambda <- matrix(runif(500 * 2, -1, 1), nrow = 500)
-    mu <- true_Z %*% t(lambda)
-    Y <- mu + matrix(rnorm(500 * 50), nrow = 500)
+    mu <- lambda %*% t(true_Z)
+    Y <- mu + matrix(rnorm(500 * 50, sd = 0.5), nrow = 500) + matrix(rnorm(500 * 50, mean = 0, sd = 1e-6), nrow = 500)
     mask <- matrix(rbinom(500 * 50, 1, prob = 0.3), nrow = 500)
     Y[mask == 1] <- 0
     se <- SummarizedExperiment(assays = list(counts = Y))
@@ -85,8 +81,8 @@ test_that("compute_log_likelihood returns a numeric scalar", {
   set.seed(123)
   true_Z <- matrix(rnorm(100), ncol = 2)
   lambda <- matrix(runif(500 * 2, -1, 1), nrow = 500)
-  mu <- true_Z %*% t(lambda)
-  Y <- mu + matrix(rnorm(500 * 50), nrow = 500)
+  mu <- lambda %*% t(true_Z)
+  Y <- mu + matrix(rnorm(500 * 50, sd = 0.5), nrow = 500) + matrix(rnorm(500 * 50, mean = 0, sd = 1e-6), nrow = 500)
   mask <- matrix(rbinom(500 * 50, 1, prob = 0.3), nrow = 500)
   Y[mask == 1] <- 0
   
