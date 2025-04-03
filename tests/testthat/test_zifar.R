@@ -16,6 +16,31 @@ test_that("fit_zifa returns a list with expected elements", {
   expect_true("model_params" %in% names(result))
   expect_true("ll" %in% names(result))
   expect_equal(ncol(result$Z), 2)
+  
+  # Enhanced verification
+  expect_true(all(result$model_params$sigma > 0))
+  expect_true(result$model_params$decay_coef > 0)
+  expect_true(all(diff(result$ll) >= -1e-6)) # Allow small numerical decreases
+})
+
+test_that("properly handles zero-inflation", {
+  set.seed(123)
+  # Create data with known zero-inflation pattern
+  true_Z <- matrix(rnorm(100), ncol = 2)
+  lambda <- matrix(runif(500 * 2, -1, 1), nrow = 500)
+  mu <- lambda %*% t(true_Z)
+  Y <- mu + matrix(rnorm(500 * 50, sd = 0.5), nrow = 500)
+  
+  # Add structured zeros (higher probability where mu is small)
+  zero_probs <- 1/(1 + exp(2*mu))
+  mask <- matrix(rbinom(500 * 50, 1, prob = zero_probs), nrow = 500)
+  Y[mask == 1] <- 0
+  
+  result <- fit_zifa(Y, k = 2)
+  
+  # Verify zeros affected the result
+  cor_zero <- cor(as.vector(mask), abs(as.vector(result$Z %*% result$model_params$lambda)))
+  expect_true(cor_zero > 0.3) # Some positive correlation expected
 })
 
 test_that("fit_zifa handles a matrix with all zeros", {
