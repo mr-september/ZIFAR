@@ -7,22 +7,38 @@
 preprocess_data(counts, base = 2, pseudocount = 1)
 }
 \arguments{
-\item{counts}{Matrix of raw count data}
+\item{counts}{Matrix of raw count data (genes x cells)}
 
 \item{base}{Base for logarithm transformation (default: 2)}
 
 \item{pseudocount}{Pseudocount to add before log transformation (default: 1)}
 }
 \value{
-Log-transformed data matrix
+Log-transformed data matrix of same dimensions as input
 }
 \description{
 Preprocesses raw count data for use with ZIFA by log-transforming it.
+This is the recommended preprocessing step before running ZIFA.
+}
+\details{
+ZIFA expects log-transformed count data, not raw counts. This function
+applies the transformation: log_base(counts + pseudocount).
+
+Common choices:
+\itemize{
+\item base=2, pseudocount=1: log2(counts + 1), commonly used in scRNA-seq
+\item base=exp(1), pseudocount=1: natural log, ln(counts + 1)
+\item base=10, pseudocount=1: log10(counts + 1)
+}
 }
 \examples{
 # Generate raw count data
-counts <- matrix(rpois(1000, lambda = 5), nrow = 100)
+counts <- matrix(rpois(1000, lambda = 5), nrow = 100, ncol = 10)
+
 # Preprocess data
 Y <- preprocess_data(counts)
+
+# Now Y is ready for ZIFA
+# result <- fit_zifa(Y, k = 2)
 
 }

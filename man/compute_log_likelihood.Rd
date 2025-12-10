@@ -2,25 +2,11 @@
 % Please edit documentation in R/zifa.R
 \name{compute_log_likelihood}
 \alias{compute_log_likelihood}
-\title{Compute log-likelihood for current parameter estimates}
+\title{Compute log-likelihood for monitoring convergence}
 \usage{
-compute_log_likelihood(Y, Z, lambda, sigma, decay_coef)
-}
-\arguments{
-\item{Y}{Data matrix}
-
-\item{Z}{Mean of latent variables}
-
-\item{lambda}{Loading matrix}
-
-\item{sigma}{Vector of variances}
-
-\item{decay_coef}{Zero-inflation decay coefficient}
-}
-\value{
-Log-likelihood value
+compute_log_likelihood(Y, EZ, A, mus, sigmas, decay_coef)
 }
 \description{
-Compute log-likelihood for current parameter estimates
+Compute log-likelihood for monitoring convergence
 }
 \keyword{internal}

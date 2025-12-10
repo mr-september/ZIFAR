@@ -4,14 +4,16 @@
 \alias{fit_block_zifa}
 \title{Fit Block ZIFA Model}
 \usage{
-fit_block_zifa(Y, k, n_blocks = NULL, ...)
+fit_block_zifa(Y, k, n_blocks = NULL, verbose = TRUE, ...)
 }
 \arguments{
 \item{Y}{Matrix of expression data (genes as rows, cells as columns)}
 
 \item{k}{Integer specifying the number of latent dimensions}
 
-\item{n_blocks}{Number of blocks to divide genes into (default: genes/500)}
+\item{n_blocks}{Number of blocks to divide genes into (default: ceiling(genes/500))}
+
+\item{verbose}{If TRUE, print progress messages (default: TRUE)}
 
 \item{...}{Additional parameters passed to fit_zifa}
 }
@@ -19,23 +21,39 @@ fit_block_zifa(Y, k, n_blocks = NULL, ...)
 A list containing:
 \item{Z}{Matrix of low-dimensional projections (cells x k dimensions)}
 \item{model_params}{List of model parameters}
+\item{n_iter}{Number of iterations for final fit}
 }
 \description{
 Implements Block Zero-Inflated Factor Analysis for more efficient processing
-of large datasets by dividing genes into blocks.
+of large datasets by dividing genes into blocks. This reduces memory usage
+and can improve numerical stability.
+}
+\details{
+The block ZIFA algorithm works by:
+\enumerate{
+\item Dividing genes into blocks of approximately 500 genes each
+\item Running ZIFA on each block independently
+\item Averaging the resulting Z estimates across blocks
+\item Using this averaged Z as initialization for a final full ZIFA run
+}
+
+This approach is recommended when the number of genes exceeds 2000.
 }
 \examples{
 # Generate large simulated dataset
 set.seed(123)
-true_Z <- matrix(rnorm(100), ncol = 2)
-lambda <- matrix(runif(1000*2, -1, 1), nrow = 1000)
-mu <- true_Z \%*\% t(lambda)
-Y <- mu + matrix(rnorm(1000*50), nrow = 1000)
-# Add zero-inflation
-mask <- matrix(rbinom(1000*50, 1, prob = 0.3), nrow = 1000)
-Y[mask == 1] <- 0
+N <- 50   # cells
+D <- 1000 # genes
+K <- 2    # latent dimensions
 
-# Run Block ZIFA
-result <- fit_block_zifa(Y, k = 2, n_blocks = 2)
+# Generate data
+Y <- matrix(rpois(D * N, lambda = 5), nrow = D, ncol = N)
+Y <- log2(Y + 1)  # Log-transform
+# Add zeros
+zero_mask <- matrix(rbinom(D * N, 1, prob = 0.3), nrow = D, ncol = N)
+Y[zero_mask == 1] <- 0
+
+# Run Block ZIFA (with verbose=FALSE for cleaner output)
+result <- fit_block_zifa(Y, k = K, n_blocks = 2, verbose = FALSE)
 
 }

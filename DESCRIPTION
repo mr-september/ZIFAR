@@ -1,15 +1,16 @@
 Package: ZIFAR
 Title: Zero-Inflated Factor Analysis for Single-Cell Data
-Version: 0.3.6
+Version: 0.4.0
 Authors@R: c(
-    person("Larry Cai", "", email = "larry.cai@uq.edu.au", role = c("aut", "cre")),
-    person("Emma Pierson", "", role = c("aut", "cph")),
-    person("Christopher Yau", "", role = c("aut", "cph"))
+    person("Larry", "Cai", email = "larry.cai@uq.edu.au", role = c("aut", "cre")),
+    person("Emma", "Pierson", role = c("aut", "cph")),
+    person("Christopher", "Yau", role = c("aut", "cph"))
   )
 Description: Native R implementation of Zero-Inflated Factor Analysis (ZIFA) 
-    for dimensionality reduction of single-cell data. This algorithm accounts 
-    for dropout events (zeros) in single-cell gene expression data. Based on 
-    Pierson & Yau (2015) <doi:10.1186/s13059-015-0805-z>.
+    for dimensionality reduction of single-cell RNA-seq data. This algorithm 
+    accounts for dropout events (excess zeros) in single-cell gene expression 
+    data by modeling the probability of dropout as a function of expression 
+    level. Based on Pierson & Yau (2015) <doi:10.1186/s13059-015-0805-z>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -17,11 +18,13 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
     stats,
-    Matrix,
     methods
 Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
-    ggplot2
+    ggplot2,
+    SummarizedExperiment
 Config/testthat/edition: 3
+URL: https://github.com/mr-september/ZIFAR
+BugReports: https://github.com/mr-september/ZIFAR/issues

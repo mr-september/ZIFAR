@@ -7,11 +7,10 @@
 fit_zifa(
   Y,
   k,
-  iterations = 100,
-  convergence_criterion = 1e-05,
-  lambda_init = NULL,
-  sigma_init = NULL,
-  decay_coef = 1
+  max_iter = 100,
+  tol = 0.01,
+  single_sigma = FALSE,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -19,38 +18,36 @@ fit_zifa(
 
 \item{k}{Integer specifying the number of latent dimensions}
 
-\item{iterations}{Maximum number of iterations for the EM algorithm}
+\item{max_iter}{Maximum number of EM iterations (default: 100)}
 
-\item{convergence_criterion}{Convergence threshold for log-likelihood}
+\item{tol}{Convergence threshold for relative parameter change (default: 1e-2)}
 
-\item{lambda_init}{Initial value for lambda parameter}
+\item{single_sigma}{If TRUE, estimate one noise variance for all genes (default: FALSE)}
 
-\item{sigma_init}{Initial value for sigma parameter}
-
-\item{decay_coef}{Initial value for zero decay coefficient}
+\item{verbose}{If TRUE, print progress messages (default: TRUE)}
 }
 \value{
 A list containing:
 \item{Z}{Matrix of low-dimensional projections (cells x k dimensions)}
-\item{model_params}{List of model parameters including lambda, sigma, and decay_coef}
+\item{model_params}{List of model parameters including A, mus, sigmas, and decay_coef}
 \item{ll}{Vector of log-likelihood values per iteration}
+\item{n_iter}{Number of iterations until convergence}
 }
 \description{
 Implements Zero-Inflated Factor Analysis for dimensionality reduction
 of zero-inflated data, especially single-cell gene expression data.
 }
 \examples{
-# Generate simulated data with dropout zeros
+# Generate simulated data with dropout
 set.seed(123)
-true_Z <- matrix(rnorm(100), ncol = 2)
-lambda <- matrix(runif(20*2, -1, 1), nrow = 20)
-mu <- true_Z \%*\% t(lambda)
-Y <- mu + matrix(rnorm(20*50), nrow = 20)
-# Add zero-inflation
-mask <- matrix(rbinom(20*50, 1, prob = 0.3), nrow = 20)
-Y[mask == 1] <- 0
+N <- 50  # cells
+D <- 20  # genes
 
-# Run ZIFA
-result <- fit_zifa(Y, k = 2)
+Y <- matrix(rpois(D * N, lambda = 5), nrow = D, ncol = N)
+Y <- log2(Y + 1)
+Y[sample(length(Y), floor(length(Y) * 0.3))] <- 0
+
+# Fit ZIFA
+result <- fit_zifa(Y, k = 2, verbose = FALSE)
 
 }

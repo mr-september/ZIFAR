@@ -7,11 +7,11 @@
 plot_zifa(Z, labels = NULL, dims = c(1, 2))
 }
 \arguments{
-\item{Z}{Matrix of ZIFA projections}
+\item{Z}{Matrix of ZIFA projections (cells x dimensions)}
 
-\item{labels}{Optional vector of labels for coloring points}
+\item{labels}{Optional vector of labels for coloring points (e.g., cell types)}
 
-\item{dims}{Dimensions to plot (default: first two dimensions)}
+\item{dims}{Which dimensions to plot (default: first two dimensions)}
 }
 \value{
 A ggplot2 object
@@ -20,14 +20,20 @@ A ggplot2 object
 Creates a scatter plot of ZIFA results in two dimensions.
 }
 \examples{
-# Generate simulated data
-set.seed(123)
-Y <- matrix(rpois(1000, lambda = 5), nrow = 100)
-Y[sample(length(Y), 500)] <- 0
+\dontrun{
+# After running ZIFA
 result <- fit_zifa(Y, k = 2)
-# Plot results
-if (requireNamespace("ggplot2", quietly = TRUE)) {
-  plot_zifa(result$Z)
+
+# Basic plot
+plot_zifa(result$Z)
+
+# With cell type labels
+cell_types <- c(rep("TypeA", 25), rep("TypeB", 25))
+plot_zifa(result$Z, labels = cell_types)
+
+# Plot dimensions 2 and 3
+result_3d <- fit_zifa(Y, k = 3)
+plot_zifa(result_3d$Z, dims = c(2, 3))
 }
 
 }

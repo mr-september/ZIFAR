@@ -2,7 +2,7 @@
 % Please edit documentation in R/zifa.R
 \name{compute_zero_probability}
 \alias{compute_zero_probability}
-\title{Compute zero probability}
+\title{Compute Zero Probability}
 \usage{
 compute_zero_probability(mu, decay_coef)
 }
@@ -15,6 +15,6 @@ compute_zero_probability(mu, decay_coef)
 Probability of zero inflation
 }
 \description{
-Compute zero probability
+Compute Zero Probability
 }
 \keyword{internal}
